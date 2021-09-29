@@ -114,6 +114,9 @@ class MyWidget(QtWidgets.QWidget):
     def get_input(self, title, question):
         text, ok = QtWidgets.QInputDialog.getText(self, title, question)
         return text
+    def get_password(self, title, question):
+        text, ok = PasswordGetter(self, title, question)
+        return text
     def addNode(self):
         path = ""
         try:
@@ -158,7 +161,7 @@ class MyWidget(QtWidgets.QWidget):
             path = []
         nodes = []
         for child in root_node.children:
-            child_gnode = QtWidgets.QTreeWidgetItem([child.name])
+            child_gnode = QtWidgets.QTreeWidgetItem([child.displayname])
             child_gnode.node = child
             local_path = path.copy()
             local_path.append(child.name)
