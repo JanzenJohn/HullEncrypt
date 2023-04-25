@@ -5,6 +5,9 @@ import hashlib
 import uuid
 import base64
 
+class ChildNotFoundException(Exception):
+    pass
+
 class Node:
     def __init__(self,
                  parent_key: bytes,
@@ -30,7 +33,6 @@ class Node:
         self.content = f.encrypt(content)
 
         self.enc_key = None
-        self.enc_pass = None
 
         if password:
             self.set_password(parent_key=parent_key, password=password)
@@ -64,7 +66,7 @@ class Node:
         
         assert key != None
         # this will fail if you have the wrong key
-        # as you will get a key regardless if it is true or not
+        # to make sure you have the correct key, call get_content
         self.get_content(key)
 
         password_key = self.get_key(parent_key=password)
@@ -95,7 +97,20 @@ class Node:
             if child.name == path[0]:
                 child_key = child.get_key(parent_key=key)
                 return child.get_child_key(child_key, path[1:])
-        raise Exception("child wasn't found")
+        raise ChildNotFoundException("child wasn't found")
+
+    def to_json(self):
+        json = {
+            "name": self.name,
+            "uuid": self.uuid,
+            "content": self.content,
+            "children": []
+        }
+
+        for child in self.children:
+            json["children"].append(child.to_json())
+
+        return json
 
 def key_from_hash(password_hash: bytes, salt: bytes):
     kdf = PBKDF2HMAC(
